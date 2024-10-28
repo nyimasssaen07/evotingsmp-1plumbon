@@ -1,36 +1,37 @@
 <?php
-define('BASEPATH', dirname(__FILE__));
+if (!isset($_POST['update'])) {
 
-session_start();
-if(!isset($_SESSION['id_admin'])) {
+   header('location: ../');
 
-   header('location:../');
+} else {
+   define('BASEPATH', dirname(__FILE__));
 
-}
-
-if (isset($_POST['update'])) {
-   //include file koneksi
    include('../../include/connection.php');
-   //tampung data dari form
-   $id    = strip_tags(mysqli_real_escape_string($con, $_POST['id']));
-   $kelas = strip_tags(mysqli_real_escape_string($con, $_POST['kelas']));
 
-   if ($id == null || $kelas == null) {
+   $nis  = $_POST['nis'];
+   $nama = $_POST['nama'];
+   $jk   = $_POST['jk'];
+   $kls  = $_POST['kelas'];
+   $pil  = $_POST['pemilih'];
 
-      echo '<script type="text/javascript">alert("Form Harus terisi");window.history.go(-1);</script>';
+   if($nis == '' || $nama == '' || $jk == '' || $kls == '') {
+
+      echo '<script type="text/javascript">alert("Semua form harus terisi");window.history.go(-1);</script>';
+
+   } else if(!preg_match("/^[a-zA-z \'.]*$/",$nama)) {
+
+      echo '<script type="text/javascript">alert("Nama hanya boleh mengandung huruf, titik(.), petik tunggal");window.history.go(-1)</script>';
 
    } else {
 
-      $sql = $con->prepare("UPDATE t_kelas SET nama_kelas = ? WHERE id_kelas = ?");
-      $sql->bind_param('ss', $kelas, $id);
+      $sql = $con->prepare("UPDATE t_user SET fullname = ?, id_kelas = ?, jk = ?, pemilih = ? WHERE id_user = ?");
+      $sql->bind_param('sssss', $nama, $kls, $jk, $pil, $nis);
       $sql->execute();
 
-      header('location:../dashboard.php?page=kelas');
+      header('location:../dashboard.php?page=user');
 
    }
 
-} else {
-
-   header('location:../dashboard.php');
-
 }
+
+?>
