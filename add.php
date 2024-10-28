@@ -1,51 +1,61 @@
 <?php
+if (isset($_POST['add_kelas'])) {
+
+   $id      = $_POST['id'];
+   $kelas   = $_POST['kelas'];
+
+   if ($id == null || $kelas == null) {
+
+      echo '<script type="text/javascript">alert("Semua form harus terisi");window.history.go(-1);</script>';
+
+   } else {
+
+      $sql = $con->prepare("INSERT INTO t_kelas(id_kelas, nama_kelas) VALUES ( ?, ?)");
+      $sql->bind_param('ss', $id, $kelas);
+      $sql->execute();
+
+      header('location:?page=kelas');
+   }
+}
+
 if(!isset($_SESSION['id_admin'])) {
    header('location: ../');
 }
+
+$id = mysqli_query($con, "SELECT id_kelas FROM t_kelas ORDER BY id_kelas DESC LIMIT 1");
+
+if (mysqli_num_rows($id) > 0) {
+   $key        = mysqli_fetch_array($id);
+   $get        = (intval(substr($key['id_kelas'], 1))) + 1;
+   $id_kelas   = "K".sprintf("%02d", $get);
+} else {
+   $id_kelas = 'K01';
+}
+
 ?>
-<h3>Tambah Kandidat</h3>
+<h3>Tambah Kelas</h3>
 <hr />
 <div class="row">
-    <div class="col-md-8">
-        <form action="./kandidat/simpan.php" method="post" enctype="multipart/form-data" class="form-horizontal">
-        
+    <div class="col-md-4">
+        <form action="" method="post">
+
             <div class="form-group">
-                <label class="col-sm-3 control-label">Nomor Kandidat</label>
-                <div class="col-md-6">
-                    <input type="text" name="nama" class="form-control" required="Nama" />
-                </div>
+                <label>Id Kelas</label>
+                <input class="form-control" type="text" name="id" readonly value="<?php echo $id_kelas; ?>" />
             </div>
 
             <div class="form-group">
-                <label class="col-sm-3 control-label">Foto Kandidat</label>
-                <div class="col-md-5">
-                    <input type="file" name="foto" class="form-control" required="Foto"/>
-                </div>
+                <label>Nama Kelas</label>
+                <input class="form-control" name="kelas" type="text" placeholder="Nama Kelas" />
             </div>
 
             <div class="form-group">
-                <label class="col-sm-3 control-label">Visi</label>
-                <div class="col-md-8">
-                    <textarea name="visi" rows="3" class="form-control" required="Visi"></textarea>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="col-sm-3 control-label">Misi</label>
-                <div class="col-md-8">
-                    <textarea name="misi" rows="3" required="Misi" class="form-control"></textarea>
-                </div>
-            </div>
-
-            <div class="form-group" style="padding-top:20px;">
-                <div class="col-md-offset-3 col-md-8">
-                    <button type="submit" name="add_kandidat" value="Tambah Kandidat" class="btn btn-success">
-                        Tambah Kandidat
-                    </button>
-                    <button type="button" onclick="window.history.go(-1)" class="btn btn-danger">
-                        Kembali
-                    </button>
-                </div>
+                <button type="submit" name="add_kelas" value="Tambah Kelas" class="btn btn-success">
+                    Tambah Kelas
+                </button>
+                <button type="button" onclick="window.history.go(-1)" class="btn btn-danger">
+                    Kembali
+                </button>
             </div>
 
         </form>

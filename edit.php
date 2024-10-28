@@ -1,68 +1,50 @@
 <?php
-if(!isset($_SESSION['id_admin']) || !isset($_GET['id'])) {
-   header('location:../');
+if(!isset($_SESSION['id_admin']) && !isset($_GET['id'])) {
+   header('location: ../');
 }
+$id = strip_tags(mysqli_real_escape_string($con, $_GET['id']));
 
-$id   = $_GET['id'];
-$sql  = $con->prepare("SELECT * FROM t_kandidat WHERE id_kandidat = ?") or die($con->error);
-$sql->bind_param('i', $id);
+$sql = $con->prepare("SELECT * FROM t_kelas WHERE id_kelas = ?");
+$sql->bind_param('s', $id);
 $sql->execute();
 $sql->store_result();
-$sql->bind_result($id, $nama, $foto, $visi, $misi, $suara, $periode);
+$num = $sql->num_rows();
+$sql->bind_result($idk, $kelas);
 $sql->fetch();
+
+if ($num > 0) {
 ?>
-<h3>Edit Data Kandidat</h3>
+<h3>Update Kelas</h3>
 <hr />
 <div class="row">
-   <div class="col-md-3">
-      <div class="callout text-center">
-         <img src="../assets/img/kandidat/<?php echo $foto; ?>" class="img-responsive"/>
-      </div>
-   </div>
-   <div class="col-md-8">
-        <form action="./kandidat/update.php" method="post" enctype="multipart/form-data" class="form-horizontal">
-            <input type="hidden" name="id" value="<?php echo $id; ?>" />
-            <input type="hidden" name="f" value="<?php echo $foto; ?>" />
+    <div class="col-md-4">
 
+        <form action="./kelas/update.php" method="post">
             <div class="form-group">
-                <label class="col-sm-3 control-label">Nama Kandidat</label>
-                <div class="col-md-8">
-                    <input type="text" class="form-control" name="nama" required="Nama" value="<?php echo $nama; ?>"/>
-                </div>
+                <label>Id Kelas</label>
+                <input class="form-control" type="text" name="id" readonly value="<?php echo $idk; ?>" />
             </div>
 
             <div class="form-group">
-                  <label class="col-sm-3 control-label">Foto Kandidat</label>
-               <div class="col-md-6">
-                  <input type="file" class="form-control" name="foto"/>
-               </div>
+                <label>Nama Kelas</label>
+                <input class="form-control" name="kelas" type="text" placeholder="Nama Kelas" value="<?php echo $kelas; ?>"/>
             </div>
 
             <div class="form-group">
-                <label class="col-sm-3 control-label">Visi</label>
-                <div class="col-md-8">
-                    <textarea name="visi" class="form-control" rows="3" required="Visi"><?php echo $visi; ?></textarea>
-                </div>
+                <button type="submit" name="update" value="Update" class="btn btn-success">
+                    Update Kelas
+                </button>
+                <button type="button" onclick="window.history.go(-1)" class="btn btn-danger">
+                    Kembali
+                </button>
             </div>
-
-            <div class="form-group">
-                <label class="col-sm-3 control-label">Misi</label>
-                <div class="col-md-8">
-                    <textarea name="misi"class="form-control" rows="3" required="Misi"><?php echo $misi; ?></textarea>
-                </div>
-            </div>
-
-            <div class="form-group" style="padding-top:20px;">
-                <div class="col-md-8 col-md-offset-3">
-                    <button type="submit" name="update" value="Update Kandidat" class="btn btn-success">
-                        Update Kandidat
-                    </button>
-                    <button type="button" onclick="window.history.go(-1)" class="btn btn-danger">
-                        Kembali
-                    </button>
-                </div>
-            </div>
-
-         </form>
+      </form>
    </div>
 </div>
+
+
+<?php
+} else {
+   header('location:?page=kelas');
+}
+?>

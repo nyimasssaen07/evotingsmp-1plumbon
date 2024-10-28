@@ -7,36 +7,24 @@ if (isset($_GET['action'])) {
 
    switch ($_GET['action']) {
       case 'tambah':
-         include('./kandidat/add.php');
+         include('./kelas/add.php');
          break;
 
       case 'edit':
-         include('./kandidat/edit.php');
-         break;
-
-      case 'view':
-         include('./kandidat/view.php');
+         include('./kelas/edit.php');
          break;
 
       case 'hapus':
 
          if (isset($_GET['id'])) {
 
-            $id   = $_GET['id'];
+            $id_kelas   = strip_tags(mysqli_real_escape_string($con, $_GET['id']));
 
-            $sql   = $con->prepare("SELECT foto FROM t_kandidat WHERE id_kandidat = ?");
-            $sql->bind_param('s', $id);
-            $sql->execute();
-            $sql->store_result();
-            $sql->bind_result($f);
-            $sql->fetch();
-            unlink('../assets/img/kandidat/'.$f);
-
-            $sql   = $con->prepare("DELETE FROM t_kandidat WHERE id_kandidat = ?");
-            $sql->bind_param('s', $id);
+            $sql        = $con->prepare("DELETE FROM t_kelas WHERE id_kelas = ?");
+            $sql->bind_param('s', $id_kelas);
             $sql->execute();
 
-            header('location: ?page=kandidat');
+            header('location: ?page=kelas');
 
          } else {
 
@@ -46,13 +34,13 @@ if (isset($_GET['action'])) {
 
          break;
       default:
-         include('./kandidat/list.php');
+         include('./kelas/list.php');
          break;
    }
 
 } else {
 
-   include('./kandidat/list.php');
+   include('./kelas/list.php');
 
 }
 ?>
