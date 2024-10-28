@@ -1,114 +1,58 @@
 <?php
-define('BASEPATH', dirname(__FILE__));
-session_start();
-
-if (isset($_SESSION['siswa'])) {
-    header('location:./vote.php');
-    exit;
+if (!isset($_SESSION['id_admin'])) {
+   header('location: ../');
 }
 
-if (isset($_POST['submit'])) {
+if (isset($_GET['action'])) {
 
-    require('include/connection.php');
+   switch ($_GET['action']) {
+      case 'tambah':
+         include('./kandidat/add.php');
+         break;
 
-    // Memastikan variabel terisi
-    $nis_keterangan = isset($_POST['nis_keterangan']) ? $_POST['nis_keterangan'] : null;
-    $thn = date('Y');
-    $dpn = date('Y') + 1;
-    $periode = $thn . '/' . $dpn;
+      case 'edit':
+         include('./kandidat/edit.php');
+         break;
 
-    // Periksa jika $nis_keterangan sudah terisi
-    if ($nis_keterangan) {
-        $cek = $con->prepare("SELECT * FROM t_pemilih WHERE nis = ? && periode = ?") or die($con->error);
-        $cek->bind_param('ss', $nis_keterangan, $periode);
-        $cek->execute();
-        $cek->store_result();
+      case 'view':
+         include('./kandidat/view.php');
+         break;
 
-        if ($cek->num_rows() > 0) {
-            echo '<script type="text/javascript">alert("Anda sudah memberikan suara");</script>';
-        } else {
-            $sql = $con->prepare("SELECT * FROM t_user WHERE id_user = ? && pemilih = 'Y'") or die($con->error);
-            $sql->bind_param('s', $nis_keterangan);
+      case 'hapus':
+
+         if (isset($_GET['id'])) {
+
+            $id   = $_GET['id'];
+
+            $sql   = $con->prepare("SELECT foto FROM t_kandidat WHERE id_kandidat = ?");
+            $sql->bind_param('s', $id);
             $sql->execute();
             $sql->store_result();
+            $sql->bind_result($f);
+            $sql->fetch();
+            unlink('../assets/img/kandidat/'.$f);
 
-            if ($sql->num_rows() > 0) {
-                $sql->bind_result($id, $user, $kelas, $jk, $pemilih);
-                $sql->fetch();
+            $sql   = $con->prepare("DELETE FROM t_kandidat WHERE id_kandidat = ?");
+            $sql->bind_param('s', $id);
+            $sql->execute();
 
-                $_SESSION['siswa'] = $id;
-                header('location:./vote.php');
-                exit;
+            header('location: ?page=kandidat');
 
-            } else {
-                echo '<script type="text/javascript">alert("Anda tidak berhak memberikan suara");</script>';
-            }
-        }
-    } else {
-        echo '<script type="text/javascript">alert("Silakan masukkan NIS/Keterangan Anda");</script>';
-    }
+         } else {
+
+            header('location: ./');
+
+         }
+
+         break;
+      default:
+         include('./kandidat/list.php');
+         break;
+   }
+
+} else {
+
+   include('./kandidat/list.php');
+
 }
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>E - Voting</title>
-    <link rel="stylesheet" href="./assets/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="./assets/css/custom.css"/>
-    <style type="text/css">
-        #content-slider {
-            position: relative;
-            width: 400px;
-            height: 300px;
-            overflow: hidden;
-        }
-        #content-slider img {
-            display: block;
-            width: 400px;
-            height: 300px;
-        }
-        .img-thanks {
-            max-width: 200px;
-            width: 100%;
-            max-height: 250px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <?php
-                if (isset($_GET['page'])) {
-                    switch ($_GET['page']) {
-                        case 'thanks':
-                            include('./thanks.php');
-                            break;
-                        default:
-                            include('./form.php');
-                            break;
-                    }
-                } else {
-                    include('./form.php');
-                }
-                ?>
-                <footer>
-                    <!-- <strong> ?php echo date('Y'); ?> <a href="https://www.duniamu38.com/">Kangjaz.com</a>.</strong> -->
-                </footer>
-            </div>
-        </div>
-    </div>
-    <script type="text/javascript" src="./assets/js/jquery-2.2.3.min.js"></script>
-    <script type="text/javascript" src="./assets/js/jquery-cycle.min.js"></script>
-    <script type="text/javascript">
-    $(document).ready(function() {
-        $('#content-slider').cycle({
-            fx: 'fade',
-            speed: 1000,
-            timeout: 500
-        });
-    });
-    </script>
-</body>
-</html>
